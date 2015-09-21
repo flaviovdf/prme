@@ -1,4 +1,4 @@
-FPMC
+PRME
 ----
 
 Python/Cython implementation of the: "Personalized Ranking Metric Embedding for

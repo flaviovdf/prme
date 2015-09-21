@@ -37,6 +37,5 @@ def compute(int[:, ::1] HSDs, double[:, ::1] XP_hk, double[:, ::1] XP_ok, \
             if aux[candidate_d] <= aux[d]:
                 rrs[i] += 1
         rrs[i] = 1.0 / rrs[i]
-        print(h, s, d, rrs[i])
 
     return np.array(rrs)
