@@ -44,7 +44,7 @@ def learn(trace_fpath, nk, rate, regularization, alpha, tau,
     rv['rate'] = np.asarray([rate])
     rv['regularization'] = np.asarray([regularization])
     rv['alpha'] = np.asarray([alpha])
-    rv['tau'] = np.asarray([alpha])
+    rv['tau'] = np.asarray([tau])
     rv['from_'] = np.asarray([from_])
     rv['cost_train'] = np.asarray([cost_train])
     rv['cost_val'] = np.asarray([cost_val])
