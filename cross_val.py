@@ -45,8 +45,8 @@ def main():
     max_cost = float('-inf')
     best_model = None
 
-    for rate in [0.00001, 0.0001, 0.001, 0.01]:
-        for reg in [0.00001, 0.0001, 0.001, 0.01, 0.1]:
+    for rate in [0.0001, 0.001, 0.01]:
+        for reg in [0.00001, 0.0001, 0.001, 0.01]:
             for alpha in [0.25, 0.5, 0.75]:
                 for tau in [0, 60 * 60, 12 * 60 * 60, 24 * 60 * 60]:
                     rv = learn(args.trace_fpath, args.num_topics, rate, \

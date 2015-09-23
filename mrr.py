@@ -20,27 +20,30 @@ def main(model, out_fpath):
     XP_ok = store['XP_ok'].values
     XG_ok = store['XG_ok'].values
     alpha = store['alpha'].values[0][0]
+    tau = store['tau'].values[0][0]
 
     hyper2id = dict(store['hyper2id'].values)
     obj2id = dict(store['obj2id'].values)
     
     HSDs = []
-    tstamps = []
+    dts = []
 
     with open(trace_fpath) as trace_file:
         for i, l in enumerate(trace_file): 
             if i < to:
                 continue
 
-            _, h, s, d = l.strip().split('\t')
+            dt, h, s, d = l.strip().split('\t')
             if h in hyper2id and s in obj2id and d in obj2id:
+                dts.append(float(dt))
                 HSDs.append([hyper2id[h], obj2id[s], obj2id[d]])
     
     num_queries = min(10000, len(HSDs))
     queries = np.random.choice(len(HSDs), size=num_queries)
     
+    dts = np.array(dts, order='C', dtype='d')
     HSDs = np.array(HSDs, order='C', dtype='i4')
-    rrs = mrr.compute(HSDs, XP_hk, XP_ok, XG_ok, alpha)
+    rrs = mrr.compute(dts, HSDs, XP_hk, XP_ok, XG_ok, alpha, tau)
     
     np.savetxt(out_fpath, rrs)
     store.close()

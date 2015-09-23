@@ -13,7 +13,6 @@ from prme.myrandom.random cimport rand
 cdef extern from 'math.h':
     inline double exp(double)
     inline double log(double)
-    inline double abs(double)
 
 cdef inline double sigma(double z):
     return 1.0 / (1 + exp(-z))
@@ -66,17 +65,15 @@ cdef void do_iter(double[::1] dts, int[:, ::1] Trace, double[:, ::1] XG_ok, \
         s = Trace[i, 1]
         d_old = Trace[i, 2]
 
-        if dt >= tau:
+        if dt > tau:
             alpha_to_use = 1.0
-            d_new = <int> (XP_ok.shape[0] * rand())
-            while d_new == d_old:
-                d_new = <int> (XP_ok.shape[0] * rand())
         else:
             alpha_to_use = alpha
-            seen_hs = seen[h, s]
+        
+        seen_hs = seen[h, s]
+        d_new = <int> (XP_ok.shape[0] * rand())
+        while d_new in seen_hs:
             d_new = <int> (XP_ok.shape[0] * rand())
-            while d_new in seen_hs:
-                d_new = <int> (XP_ok.shape[0] * rand())
             
         z = compute_dist(h, s, d_new, alpha_to_use, \
                 XG_ok, XP_ok, XP_hk)
@@ -131,24 +128,24 @@ cdef void do_iter(double[::1] dts, int[:, ::1] Trace, double[:, ::1] XG_ok, \
             update_XP_dold[k] = rate * ((1 - sigma_z) * deriv_XP_dold[k] - \
                     (2 * regularization * XP_ok[d_old, k]))
         
-        if dt < tau:
+        update(h, XP_hk, update_XP_h)
+        update(d_new, XP_ok, update_XP_dnew)
+        update(d_old, XP_ok, update_XP_dold)
+        
+        if dt <= tau:
             for k in range(XP_ok.shape[1]):
                 update_XG_s[k] = rate * ((1 - sigma_z) * deriv_XG_s[k] - \
                         (2 * regularization * XG_ok[s, k]))
                 
-                update_XG_dnew[k] = rate * ((1 - sigma_z) * deriv_XP_dnew[k] - \
+                update_XG_dnew[k] = rate * ((1 - sigma_z) * deriv_XG_dnew[k] - \
                         (2 * regularization * XG_ok[d_new, k]))
                 
                 update_XG_dold[k] = rate * ((1 - sigma_z) * deriv_XG_dold[k] - \
                         (2 * regularization * XG_ok[d_old, k]))
         
-        update(h, XP_hk, update_XP_h)
-        update(d_new, XP_ok, update_XP_dnew)
-        update(d_old, XP_ok, update_XP_dold)
-        
-        update(s, XG_ok, update_XG_s)
-        update(d_new, XG_ok, update_XG_dnew)
-        update(d_old, XG_ok, update_XG_dold)
+            update(s, XG_ok, update_XG_s)
+            update(d_new, XG_ok, update_XG_dnew)
+            update(d_old, XG_ok, update_XG_dold)
         
 def compute_cost(double[::1] dts, int[:, ::1] Trace, double[:, ::1] XG_ok, \
         double[:, ::1] XP_ok, double[:, ::1] XP_hk, dict seen, double rate, \
